@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"github.com/zacksfF/Hotel-Reservation-Backend/api"
+	"github.com/zacksfF/Hotel-Reservation-Backend/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -43,10 +44,10 @@ func main() {
 		}
 		userHandler    = api.NewUserHandler(userStore)
 		hotelHandler   = api.NewHotelHandler(store)
-		authHandler    = api.NewAuthHandler(userStore)
+		authHandler = api.NewAuthHandler(userStore)
 		roomHandler    = api.NewRoomHandler(store)
 		bookingHandler = api.NewBookingHandler(store)
-		app            = fiber.New(config)
+		app            = fiber.New(fiber.Config{})
 		auth           = app.Group("/api")
 		apiv1          = app.Group("/api/v1", api.JWTAuthentication(userStore))
 		admin          = apiv1.Group("/admin", api.AdminAuth)
@@ -54,30 +55,28 @@ func main() {
 
 	// auth
 	auth.Post("/auth", authHandler.HandleAuthenticate)
-
-	// Versioned API routes
-	// user handlers
+	//user handleuserStore
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
 	apiv1.Put("/user/:id", userHandler.HandlePutUser)
 	apiv1.Delete("/user/:id", userHandler.HandleDeleteUser)
 	apiv1.Post("/user", userHandler.HandlePostUser)
-	apiv1.Get("/user", userHandler.HandleGetUsers)
+	apiv1.Get("/user", userHandler.HandleGetUser)
 
 	// hotel handlers
-	apiv1.Get("/hotel", hotelHandler.HandleGetHotels)
+	apiv1.Get("/hotel", hotelHandler.HandleGetHotel)
 	apiv1.Get("/hotel/:id", hotelHandler.HandleGetHotel)
 	apiv1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
 
-	// rooms handlers
+	//rooms handlers
 	apiv1.Get("/room", roomHandler.HandleGetRooms)
 	apiv1.Post("/room/:id/book", roomHandler.HandleBookRoom)
 	// TODO: cancel a booking
 
 	// bookings handlers
-	apiv1.Get("/booking/:id", bookingHandler.HandleGetBooking)
+	apiv1.Get("/booking/:id", bookingHandler.HandleGetBookings)
 	apiv1.Get("/booking/:id/cancel", bookingHandler.HandleCancelBooking)
 
-	// admin handlers
+	//admin handlers
 	admin.Get("/booking", bookingHandler.HandleGetBookings)
 
 	listenAddr := os.Getenv("HTTP_LISTEN_ADDRESS")
