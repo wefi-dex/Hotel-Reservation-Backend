@@ -1,60 +1,50 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber"
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
-	if apiError, ok := err.(Error); ok {
+	if apiError, ok := err.(*Error); ok {
 		return c.Status(apiError.Code).JSON(apiError)
 	}
+
 	apiError := NewError(http.StatusInternalServerError, err.Error())
 	return c.Status(apiError.Code).JSON(apiError)
 }
 
 type Error struct {
-	Code int    `json:"code"`
-	Err  string `json:"error"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
-// Error implements the Error interface
+// Error implements error interface
 func (e Error) Error() string {
-	return e.Err
+	return e.Message
 }
 
-func NewError(code int, err string) Error {
-	return Error{
-		Code: code,
-		Err:  err,
+func NewError(code int, message string) *Error {
+	return &Error{
+		Code:    code,
+		Message: message,
 	}
 }
 
-func ErrUnAuthorized() Error {
-	return Error{
-		Code: http.StatusUnauthorized,
-		Err:  "unauthorized request",
-	}
+func ErrInvalidID() *Error {
+	return NewError(http.StatusBadRequest, "invalid id")
 }
 
-func ErrNotResourceNotFound(res string) Error {
-	return Error{
-		Code: http.StatusNotFound,
-		Err:  res + " resource not found",
-	}
+func ErrUnauthorized() *Error {
+	return NewError(http.StatusUnauthorized, "unauthorized")
 }
 
-func ErrBadRequest() Error {
-	return Error{
-		Code: http.StatusBadRequest,
-		Err:  "invalid JSON request",
-	}
+func ErrBadRequest() *Error {
+	return NewError(http.StatusBadRequest, "invalid JSON request")
 }
 
-func ErrInvalidID() Error {
-	return Error{
-		Code: http.StatusBadRequest,
-		Err:  "invalid id given",
-	}
+func ErrResourceNotFound(resource string) *Error {
+	return NewError(http.StatusNotFound, fmt.Sprintf("%s not found", resource))
 }

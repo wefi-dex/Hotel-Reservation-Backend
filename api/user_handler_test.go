@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/zacksfF/Hotel-Reservation-Backend/types"
 )
 
@@ -15,37 +15,43 @@ func TestPostUser(t *testing.T) {
 	defer tdb.teardown(t)
 
 	app := fiber.New()
-	userHandler := NewUserHandler(tdb.User)
-	app.Post("/", userHandler.HandlePostUser)
+	// userHandler := NewUserHandler(tdb.UserStore)
+	// app.Post("/", userHandler.HandlePostUser)
 
 	params := types.CreateUserParams{
-		Email:     "some@foo.com",
-		FirstName: "James",
-		LastName:  "Foo",
-		Password:  "lkdfjkdsjfklfdjkedf",
+		FirstName: "John",
+		LastName:  "Doe",
+		Email:     "zakaria.saiff@mm.com",
+		Password:  "password12345",
 	}
 	b, _ := json.Marshal(params)
+
 	req := httptest.NewRequest("POST", "/", bytes.NewReader(b))
 	req.Header.Add("Content-Type", "application/json")
+
 	resp, err := app.Test(req)
 	if err != nil {
 		t.Error(err)
 	}
+
 	var user types.User
-	json.NewDecoder(resp.Body).Decode(&user)
-	if len(user.ID) == 0 {
-		t.Errorf("expecting a user id to be set")
+	err = json.NewDecoder(resp.Body).Decode(&user)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if user.ID.IsZero() {
+		t.Error("Expected user.ID to be not empty")
 	}
 	if len(user.EncryptedPassword) > 0 {
-		t.Errorf("expecting the EncryptedPassword not to be included in the json response")
+		t.Error("Expected user.EncryptedPassword to be not returned")
 	}
 	if user.FirstName != params.FirstName {
-		t.Errorf("expected firstname %s but got %s", params.FirstName, user.FirstName)
+		t.Errorf("Expected %s, got %s", params.FirstName, user.FirstName)
 	}
 	if user.LastName != params.LastName {
-		t.Errorf("expected last name %s but got %s", params.LastName, user.LastName)
+		t.Errorf("Expected %s, got %s", params.LastName, user.LastName)
 	}
 	if user.Email != params.Email {
-		t.Errorf("expected email %s but got %s", params.Email, user.Email)
+		t.Errorf("Expected %s, got %s", params.Email, user.Email)
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber"
-	"github.com/zacksfF/Hotel-Reservation-Backend/storeer"
+	"github.com/zacksfF/Hotel-Reservation-Backend/db"
 	"github.com/zacksfF/Hotel-Reservation-Backend/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,10 +28,10 @@ func (p BookRoomParams) validate() error {
 }
 
 type RoomHandler struct {
-	store *storeer.Store
+	store *db.Store
 }
 
-func NewRoomHandler(store *storeer.Store) *RoomHandler {
+func NewRoomHandler(store *db.Store) *RoomHandler {
 	return &RoomHandler{
 		store: store,
 	}

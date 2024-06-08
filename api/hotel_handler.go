@@ -2,16 +2,16 @@ package api
 
 import (
 	"github.com/gofiber/fiber"
-	"github.com/zacksfF/Hotel-Reservation-Backend/storeer"
+	"github.com/zacksfF/Hotel-Reservation-Backend/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type HotelHandler struct {
-	store *storeer.Store
+	store *db.Store
 }
 
-func NewHotelHandler(store *storeer.Store) *HotelHandler {
+func NewHotelHandler(store *db.Store) *HotelHandler {
 	return &HotelHandler{
 		store: store,
 	}
@@ -27,7 +27,7 @@ func (h *HotelHandler) HandleGetRooms(c *fiber.Ctx) error {
 	filter := bson.M{"hotelID": oid}
 	rooms, err := h.store.Room.GetRooms(c.Context(), filter)
 	if err != nil {
-		return ErrNotResourceNotFound("hotel")
+		return ErrResourceNotFound("hotel")
 	}
 	return c.JSON(rooms)
 }
@@ -36,7 +36,7 @@ func (h *HotelHandler) HandleGetHotel(c *fiber.Ctx) error {
 	id := c.Params("id")
 	hotel, err := h.store.Hotel.GetHotelByID(c.Context(), id)
 	if err != nil {
-		return ErrNotResourceNotFound("hotel")
+		return ErrResourceNotFound("hotel")
 	}
 	return c.JSON(hotel)
 }
@@ -48,7 +48,7 @@ type ResourceResp struct {
 }
 
 type HotelQueryParams struct {
-	storeer.Pagination
+	db.Pagination
 	Rating int
 }
 
@@ -57,12 +57,12 @@ func (h *HotelHandler) HandleGetHotels(c *fiber.Ctx) error {
 	if err := c.QueryParser(&params); err != nil {
 		return ErrBadRequest()
 	}
-	filter := storeer.Map{
+	filter := db.Map{
 		"rating": params.Rating,
 	}
 	hotels, err := h.store.Hotel.GetHotels(c.Context(), filter, &params.Pagination)
 	if err != nil {
-		return ErrNotResourceNotFound("hotels")
+		return ErrResourceNotFound("hotels")
 	}
 	resp := ResourceResp{
 		Data:    hotels,

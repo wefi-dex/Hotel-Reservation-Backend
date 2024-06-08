@@ -7,18 +7,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/zacksfF/Hotel-Reservation-Backend/storeer"
+	"github.com/zacksfF/Hotel-Reservation-Backend/db"
 	"github.com/zacksfF/Hotel-Reservation-Backend/types"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AuthHandler struct {
-	userStore storeer.UserStore
+	userStore db.UserStore
 }
 
-func NewAuthHandler(userStore storeer.UserStore) *AuthHandler {
+func NewAuthHandler(userStore db.UserStore) *AuthHandler {
 	return &AuthHandler{
 		userStore: userStore,
 	}
